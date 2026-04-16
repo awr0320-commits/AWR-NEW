@@ -1912,497 +1912,592 @@ const WorkshopView = ({ items, onSaveCreation, onPublish, onRemoveItem, isRateLi
                 <X size={16} />
               </button>
             </div>
-            
-            <div className="p-5 space-y-4">
-              {/* Mode Toggle (3D/2D) */}
-              <div className="flex bg-stone-100 p-1 rounded-xl mb-2">
-                <button 
-                  onClick={() => setModelMode('3D')}
-                  className={cn(
-                    "flex-1 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all",
-                    modelMode === '3D' ? "bg-white text-black shadow-sm" : "text-black/40"
-                  )}
-                >
-                  {t('workshop_mode_3d')}
-                </button>
-                <button 
-                  onClick={() => setModelMode('2D')}
-                  className={cn(
-                    "flex-1 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all",
-                    modelMode === '2D' ? "bg-white text-black shadow-sm" : "text-black/40"
-                  )}
-                >
-                  {t('workshop_mode_2d')}
-                </button>
-              </div>
 
-              {/* Gender Toggle */}
-              <div className="flex bg-stone-100 p-1 rounded-xl">
-                <button 
-                  onClick={() => setMannequinParams(p => ({ ...p, gender: 'male', height: 173 / 175 }))}
-                  className={cn(
-                    "flex-1 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all",
-                    mannequinParams.gender === 'male' ? "bg-white text-black shadow-sm" : "text-black/40"
-                  )}
-                >
-                  {t('workshop_male')}
-                </button>
-                <button 
-                  onClick={() => setMannequinParams(p => ({ ...p, gender: 'female', height: 163 / 175 }))}
-                  className={cn(
-                    "flex-1 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all",
-                    mannequinParams.gender === 'female' ? "bg-white text-black shadow-sm" : "text-black/40"
-                  )}
-                >
-                  {t('workshop_female')}
-                </button>
-              </div>
+        {/* UI Overlay Elements */}
+        {/* Removed aiAdvice overlay as it is now integrated into chat */}
 
-              {/* Body Measurement Sliders */}
-              <div className="grid grid-cols-2 gap-x-6 gap-y-3">
-                {[
-                  { label: `${t('workshop_height')} (cm)`, key: 'height', min: 150, max: 200, base: 175 },
-                  { label: `${t('workshop_chest')} (cm)`, key: 'chest', min: 70, max: 120, base: 90 },
-                  { label: `${t('workshop_waist')} (cm)`, key: 'waist', min: 50, max: 100, base: 70 },
-                  { label: `${t('workshop_hips')} (cm)`, key: 'hips', min: 70, max: 120, base: 95 },
-                ].map(slider => {
-                  const currentVal = (mannequinParams as any)[slider.key] * slider.base;
-                  return (
-                    <div key={slider.key} className="space-y-1.5">
+        <div className="absolute top-8 left-6 right-6 flex items-start justify-between z-50 pointer-events-none">
+          <div className="flex flex-col gap-3 pointer-events-auto">
+            <button 
+              onClick={onClose}
+              className="p-3 bg-white/80 backdrop-blur-xl rounded-2xl shadow-sm border border-black/5 active:scale-90 transition-all"
+            >
+              <ChevronRight className="rotate-180" size={24} />
+            </button>
+          </div>
+
+          <div className="flex flex-col items-end gap-3 pointer-events-auto">
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={() => setModelMode((m: string) => m === '2D' ? '3D' : '2D')}
+                className="px-4 py-2 bg-black text-white rounded-full text-[10px] font-black uppercase tracking-widest shadow-xl flex items-center gap-2 active:scale-95 transition-all"
+              >
+                {modelMode === '2D' ? <Box size={14}/> : <Layout size={14}/>}
+                {modelMode === '2D' ? "3D Mode" : "2D Mode"}
+              </button>
+
+              <button 
+                onClick={() => setIsShareModalOpen(true)}
+                className="px-6 py-3 bg-indigo-600 text-white rounded-full text-[10px] font-black uppercase tracking-widest shadow-xl shadow-indigo-200 flex items-center gap-2 active:scale-95 transition-all"
+              >
+                <Share size={14} />
+                {t('workshop_upload_btn')}
+              </button>
+            </div>
+
+            {/* Model customization trigger */}
+            <button 
+              onClick={() => setIsMannequinPanelOpen(!isMannequinPanelOpen)}
+              className={cn(
+                "p-3 rounded-2xl shadow-lg backdrop-blur-xl border transition-all active:scale-90",
+                isMannequinPanelOpen ? "bg-black text-white border-black" : "bg-white/80 text-black border-black/5"
+              )}
+            >
+              <User size={20} />
+            </button>
+          </div>
+        </div>
+
+        {/* Bottom Tool Bar */}
+        <div className="absolute bottom-10 left-6 right-6 flex justify-between items-center z-50 pointer-events-none">
+          <div className="flex gap-2 pointer-events-auto">
+            <button 
+              onClick={() => {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.multiple = true;
+                input.accept = 'image/*';
+                input.onchange = (e) => handleWorkshopUpload(e as any);
+                input.click();
+              }}
+              className="p-4 bg-white/80 backdrop-blur-2xl rounded-[24px] shadow-sm border border-black/5 active:scale-95 transition-all text-black/60 hover:text-black"
+            >
+              <Camera size={20} />
+            </button>
+            <button 
+              onClick={() => setCanvasItems([])}
+              className="p-4 bg-white/80 backdrop-blur-2xl rounded-[24px] shadow-sm border border-black/5 active:scale-95 transition-all text-red-500/60 hover:text-red-500"
+            >
+              <Trash2 size={20} />
+            </button>
+          </div>
+
+          <div className="flex gap-2 pointer-events-auto">
+            <button 
+              onClick={() => setIsChatOpen(!isChatOpen)}
+              className={cn(
+                "p-4 rounded-[24px] shadow-xl backdrop-blur-2xl border transition-all active:scale-95 flex items-center gap-2",
+                isChatOpen ? "bg-black text-white border-black" : "bg-indigo-600 text-white border-indigo-400"
+              )}
+            >
+              <Bot size={20} className={isChatLoading ? "animate-pulse" : ""} />
+              <span className="text-[10px] font-black uppercase tracking-widest">Stylist</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Side Panel (Mannequin Customization) */}
+        <AnimatePresence>
+          {isMannequinPanelOpen && (
+            <motion.div 
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              className="fixed inset-y-0 right-0 w-80 bg-white/90 backdrop-blur-2xl z-[70] shadow-2xl border-l border-black/5 p-8 pt-24 overflow-y-auto no-scrollbar"
+            >
+              <div className="space-y-8">
+                <div>
+                  <h3 className="text-xs font-black uppercase tracking-[0.2em] text-black/30 mb-6">{t('workshop_model_settings')}</h3>
+                  
+                  {/* Mannequin Type Toggle */}
+                  <div className="flex p-1 bg-stone-100 rounded-xl mb-6">
+                    <button 
+                      onClick={() => setMannequinType('procedural')}
+                      className={cn(
+                        "flex-1 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all",
+                        mannequinType === 'procedural' ? "bg-white text-black shadow-sm" : "text-black/40"
+                      )}
+                    >
+                      Real 3D
+                    </button>
+                    <button 
+                      onClick={() => setMannequinType('fbx')}
+                      className={cn(
+                        "flex-1 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all",
+                        mannequinType === 'fbx' ? "bg-white text-black shadow-sm" : "text-black/40"
+                      )}
+                    >
+                      Style FBX
+                    </button>
+                  </div>
+
+                  {/* Gender Toggle */}
+                  <div className="flex p-1 bg-stone-100 rounded-xl mb-6">
+                    <button 
+                      onClick={() => setMannequinParams((p: any) => ({ ...p, gender: 'male', height: 1.0 }))}
+                      className={cn(
+                        "flex-1 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all",
+                        mannequinParams.gender === 'male' ? "bg-white text-black shadow-sm" : "text-black/40"
+                      )}
+                    >
+                      {t('workshop_male')}
+                    </button>
+                    <button 
+                      onClick={() => setMannequinParams((p: any) => ({ ...p, gender: 'female', height: 163 / 175 }))}
+                      className={cn(
+                        "flex-1 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all",
+                        mannequinParams.gender === 'female' ? "bg-white text-black shadow-sm" : "text-black/40"
+                      )}
+                    >
+                      {t('workshop_female')}
+                    </button>
+                  </div>
+
+                  {/* Body Measurement Sliders */}
+                  <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+                    {[
+                      { label: `${t('workshop_height')} (cm)`, key: 'height', min: 150, max: 200, base: 175 },
+                      { label: `${t('workshop_chest')} (cm)`, key: 'chest', min: 70, max: 120, base: 90 },
+                      { label: `${t('workshop_waist')} (cm)`, key: 'waist', min: 50, max: 100, base: 70 },
+                      { label: `${t('workshop_hips')} (cm)`, key: 'hips', min: 70, max: 120, base: 95 },
+                    ].map(slider => {
+                      const currentVal = (mannequinParams as any)[slider.key] * slider.base;
+                      return (
+                        <div key={slider.key} className="space-y-1.5">
+                          <div className="flex justify-between items-center">
+                            <label className="text-[8px] font-black uppercase tracking-widest text-black/40">{slider.label}</label>
+                            <span className="text-[8px] font-mono text-black/60">{currentVal.toFixed(0)}</span>
+                          </div>
+                          <input 
+                            type="range"
+                            min={slider.min}
+                            max={slider.max}
+                            step="1"
+                            value={currentVal}
+                            onChange={(e) => {
+                              const val = parseFloat(e.target.value);
+                              setMannequinParams((p: any) => ({ ...p, [slider.key]: val / slider.base }));
+                            }}
+                            className="w-full h-1 bg-stone-100 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                          />
+                        </div>
+                      );
+                    })}
+                    {/* Body Type Slider */}
+                    <div className="space-y-1.5 col-span-2">
                       <div className="flex justify-between items-center">
-                        <label className="text-[8px] font-black uppercase tracking-widest text-black/40">{slider.label}</label>
-                        <span className="text-[8px] font-mono text-black/60">{currentVal.toFixed(0)}</span>
+                        <label className="text-[8px] font-black uppercase tracking-widest text-black/40">{t('workshop_weight_label')}</label>
+                        <span className="text-[8px] font-mono text-black/60">{(mannequinParams as any).weight || 1.0}</span>
                       </div>
                       <input 
                         type="range"
-                        min={slider.min}
-                        max={slider.max}
-                        step="1"
-                        value={currentVal}
+                        min="0.7"
+                        max="1.5"
+                        step="0.01"
+                        value={(mannequinParams as any).weight || 1.0}
                         onChange={(e) => {
                           const val = parseFloat(e.target.value);
-                          setMannequinParams(p => ({ ...p, [slider.key]: val / slider.base }));
+                          setMannequinParams((p: any) => ({ ...p, weight: val }));
                         }}
                         className="w-full h-1 bg-stone-100 rounded-lg appearance-none cursor-pointer accent-indigo-600"
                       />
                     </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Integrated AI Chat Window (Siri-like) */}
+        <AnimatePresence>
+          {isChatOpen && (
+            <motion.div 
+              initial={{ opacity: 0, y: 20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 20, scale: 0.95 }}
+              className="fixed bottom-32 right-6 left-6 md:left-auto md:w-96 z-[100] bg-white/95 backdrop-blur-2xl rounded-[32px] shadow-2xl border border-black/5 flex flex-col overflow-hidden max-h-[60vh]"
+            >
+              {/* Chat Header */}
+              <div className="p-6 border-b border-black/5 flex items-center justify-between bg-indigo-50/50">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-indigo-600 text-white rounded-xl shadow-lg shadow-indigo-200">
+                    <Bot size={18} />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-black tracking-tight">{t('chat_title')}</h4>
+                    <p className="text-[10px] text-indigo-600/60 font-bold uppercase tracking-widest">{t('chat_status')}</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setIsChatOpen(false)}
+                  className="p-2 hover:bg-black/5 rounded-full transition-colors"
+                >
+                  <X size={18} className="text-black/40" />
+                </button>
+              </div>
+
+              {/* Chat Messages */}
+              <div className="flex-1 overflow-y-auto p-6 space-y-4 no-scrollbar">
+                {(chatMessages ?? []).map((msg: any, idx: number) => {
+                  if (!msg) return null;
+                  const isUser = msg.role === 'user';
+                  return (
+                    <div 
+                      key={`${idx}-${msg.role}`} 
+                      className={cn(
+                        "flex flex-col max-w-[85%]",
+                        isUser ? "ml-auto items-end" : "items-start"
+                      )}
+                    >
+                      <div className={cn(
+                        "px-4 py-3 rounded-2xl text-sm leading-relaxed",
+                        isUser 
+                          ? "bg-black text-white rounded-tr-none" 
+                          : "bg-stone-100 text-black rounded-tl-none"
+                      )}>
+                        <Markdown>{msg.text?.toString() || ""}</Markdown>
+                      </div>
+                    </div>
                   );
                 })}
-                {/* Body Type Slider */}
-                <div className="space-y-1.5 col-span-2">
-                  <div className="flex justify-between items-center">
-                    <label className="text-[8px] font-black uppercase tracking-widest text-black/40">{t('workshop_weight_label')}</label>
-                    <span className="text-[8px] font-mono text-black/60">{(mannequinParams as any).weight || 1.0}</span>
-                  </div>
-                  <input 
-                    type="range"
-                    min="0.7"
-                    max="1.5"
-                    step="0.01"
-                    value={(mannequinParams as any).weight || 1.0}
-                    onChange={(e) => {
-                      const val = parseFloat(e.target.value);
-                      setMannequinParams(p => ({ ...p, weight: val }));
-                    }}
-                    className="w-full h-1 bg-stone-100 rounded-lg appearance-none cursor-pointer accent-indigo-600"
-                  />
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Integrated AI Chat Window (Siri-like) */}
-      <AnimatePresence>
-        {isChatOpen && (
-          <motion.div 
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed bottom-32 right-6 left-6 md:left-auto md:w-96 z-[100] bg-white/95 backdrop-blur-2xl rounded-[32px] shadow-2xl border border-black/5 flex flex-col overflow-hidden max-h-[60vh]"
-          >
-            {/* Chat Header */}
-            <div className="p-6 border-b border-black/5 flex items-center justify-between bg-indigo-50/50">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-indigo-600 text-white rounded-xl shadow-lg shadow-indigo-200">
-                  <Bot size={18} />
-                </div>
-                <div>
-                  <h4 className="text-sm font-black tracking-tight">{t('chat_title')}</h4>
-                  <p className="text-[10px] text-indigo-600/60 font-bold uppercase tracking-widest">{t('chat_status')}</p>
-                </div>
-              </div>
-              <button 
-                onClick={() => setIsChatOpen(false)}
-                className="p-2 hover:bg-black/5 rounded-full transition-colors"
-              >
-                <X size={18} className="text-black/40" />
-              </button>
-            </div>
-
-            {/* Chat Messages */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-4 no-scrollbar">
-              {(chatMessages ?? []).map((msg, idx) => {
-                if (!msg) return null;
-                const isUser = msg.role === 'user';
-                return (
-                  <div 
-                    key={`${idx}-${msg.role}`} 
-                    className={cn(
-                      "flex flex-col max-w-[85%]",
-                      isUser ? "ml-auto items-end" : "items-start"
-                    )}
-                  >
-                    <div className={cn(
-                      "px-4 py-3 rounded-2xl text-sm leading-relaxed",
-                      isUser 
-                        ? "bg-black text-white rounded-tr-none" 
-                        : "bg-stone-100 text-black rounded-tl-none"
-                    )}>
-                      <Markdown>{msg.text?.toString() || ""}</Markdown>
+                {isChatLoading && (
+                  <div className="flex items-start max-w-[85%]">
+                    <div className="bg-stone-100 px-4 py-3 rounded-2xl rounded-tl-none flex gap-1">
+                      <div className="w-1.5 h-1.5 bg-black/20 rounded-full animate-bounce" />
+                      <div className="w-1.5 h-1.5 bg-black/20 rounded-full animate-bounce [animation-delay:0.2s]" />
+                      <div className="w-1.5 h-1.5 bg-black/20 rounded-full animate-bounce [animation-delay:0.4s]" />
                     </div>
                   </div>
-                );
-              })}
-              {isChatLoading && (
-                <div className="flex items-start max-w-[85%]">
-                  <div className="bg-stone-100 px-4 py-3 rounded-2xl rounded-tl-none flex gap-1">
-                    <div className="w-1.5 h-1.5 bg-black/20 rounded-full animate-bounce" />
-                    <div className="w-1.5 h-1.5 bg-black/20 rounded-full animate-bounce [animation-delay:0.2s]" />
-                    <div className="w-1.5 h-1.5 bg-black/20 rounded-full animate-bounce [animation-delay:0.4s]" />
-                  </div>
-                </div>
-              )}
-              <div ref={chatEndRef} />
-            </div>
-
-            {/* Chat Input */}
-            <div className="p-4 border-t border-black/5 bg-stone-50/50">
-              <div className="relative">
-                <input 
-                  type="text" 
-                  value={chatInput}
-                  onChange={(e) => setChatInput(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-                  placeholder={t('chat_placeholder')}
-                  className="w-full bg-white border border-black/10 rounded-2xl py-4 pl-6 pr-14 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600/20 transition-all shadow-sm"
-                />
-                <button 
-                  onClick={handleSendMessage}
-                  disabled={!chatInput.trim() || isChatLoading}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 p-2.5 bg-indigo-600 text-white rounded-xl shadow-lg shadow-indigo-200 disabled:opacity-50 disabled:shadow-none transition-all active:scale-95"
-                >
-                  <Send size={18} />
-                </button>
+                )}
+                <div ref={chatEndRef} />
               </div>
-              <div className="mt-3 flex justify-center">
-                <button 
-                  onClick={() => window.open('https://gemini.google.com/gem/10bJC9GZg4W6gn-3tgB7nYLooZ2nwV7EN?usp=sharing', '_blank')}
-                  className="text-[10px] font-bold text-indigo-600/60 hover:text-indigo-600 flex items-center gap-1 transition-colors"
-                >
-                  <MessageSquare size={10} />
-                  Open Full Gemini Assistant
-                </button>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
-      {/* Crop Modal */}
-      {itemToCrop && (
-        <ImageCropModal 
-          image={itemToCrop.imageUrl}
-          onClose={() => setItemToCrop(null)}
-          onConfirm={(croppedUrl) => {
-            setCanvasItems(prev => prev.map(i => i.id === itemToCrop.id ? { ...i, imageUrl: croppedUrl } : i));
-            setItemToCrop(null);
-          }}
-        />
-      )}
-
-      {/* Swipeable Closet Panel & Zoom Indicator Group */}
-      <motion.div 
-        initial={false}
-        animate={{ y: closetY }}
-        transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-        className="fixed top-0 left-0 right-0 z-[60] flex flex-col h-screen"
-      >
-        {/* The Beige Panel */}
-        <div 
-          onClick={(e) => e.stopPropagation()}
-          className="bg-[#D9CDBF] rounded-t-[40px] shadow-[0_-10px_40px_rgba(0,0,0,0.1)] flex flex-col h-full"
-        >
-          {/* Drag Handle / Swipe Trigger - Now Tab to Open */}
-          <div 
-            onClick={handleToggleCloset}
-            className="w-full py-4 flex justify-center cursor-pointer shrink-0 hover:bg-black/5 transition-colors rounded-t-[40px]"
-          >
-            <div className="w-12 h-1.5 bg-black/20 rounded-full" />
-          </div>
-
-          {/* Category Tabs (Reverted to original design: Tops, Bottoms, Accessories, Model) */}
-          <div className={cn(
-            "flex justify-start items-center gap-1 mb-4 px-6 shrink-0 transition-opacity duration-200 overflow-x-auto no-scrollbar touch-pan-x",
-            closetState === 'closed' ? "opacity-0 pointer-events-none" : "opacity-100"
-          )}>
-
-            {[
-              { id: 'All', label: t('closet_all') },
-              { id: 'Tops', label: t('closet_tops') },
-              { id: 'Bottoms', label: t('closet_bottoms') },
-              { id: 'Shoes', label: t('closet_shoes') },
-              { id: 'Accessories', label: t('closet_accessories') }
-            ].map(cat => (
-              <button 
-                key={cat.id} 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setActiveCategory(cat.id as any);
-                }}
-                className={cn(
-                  "flex items-center gap-1 px-8 py-2 rounded-full text-[10px] font-bold transition-all border border-transparent whitespace-nowrap shrink-0",
-                  activeCategory === cat.id 
-                    ? "bg-black text-white shadow-lg" 
-                    : "bg-white/40 text-black/60 hover:bg-white/80"
-                )}
-              >
-                {cat.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Mannequin Type Toggle (Removed from here to avoid confusion) */}
-
-          {/* Item Grid */}
-          <div className={cn(
-            "grid grid-cols-2 gap-3 overflow-y-auto no-scrollbar px-4 pb-48 flex-1 transition-opacity duration-200",
-            closetState === 'closed' ? "opacity-0 pointer-events-none" : "opacity-100"
-          )}>
-            {filteredWardrobe.map(item => (
-              <div 
-                key={item.id} 
-                role="button"
-                tabIndex={0}
-                draggable={!isSelectMode}
-                onDragStart={(e) => !isSelectMode && handleDragStart(e, item)}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (isSelectMode) {
-                    if (selectedIds.includes(item.id)) {
-                      setSelectedIds(prev => prev.filter(id => id !== item.id));
-                    } else if (selectedIds.length < 5) {
-                      setSelectedIds(prev => [...prev, item.id]);
-                    }
-                  } else {
-                    addToCanvas(item);
-                  }
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    if (!isSelectMode) addToCanvas(item);
-                  }
-                }}
-                className={cn(
-                  "aspect-square bg-transparent rounded-2xl p-2 shadow-sm transition-all group relative border-2 cursor-pointer",
-                  isSelectMode
-                    ? selectedIds.includes(item.id) 
-                      ? "border-indigo-600 scale-[0.98] shadow-lg shadow-indigo-100/50" 
-                      : "border-transparent"
-                    : item.category === 'Media' 
-                      ? selectedModel?.id === item.id ? "border-indigo-600 scale-105" : "border-transparent"
-                      : canvasItems.find(i => i.id === item.id) ? "border-indigo-600 scale-105" : "border-transparent",
-                  !isSelectMode && "active:scale-95"
-                )}
-              >
-                <ClothingImage 
-                  src={item.imageUrl} 
-                  alt={item.name} 
-                  className={cn(
-                    "w-full h-full p-2 transition-transform duration-500", 
-                    item.category === 'Media' ? "object-cover rounded-xl" : "object-contain drop-shadow-md",
-                    !isSelectMode && "group-hover:scale-110"
-                  )} 
-                />
-
-                {isSelectMode && selectedIds.includes(item.id) && (
-                  <div className="absolute top-2 right-2 bg-indigo-600 text-white w-6 h-6 rounded-full flex items-center justify-center font-black text-[10px] shadow-lg border-2 border-white z-20">
-                    {selectedIds.indexOf(item.id) + 1}
-                  </div>
-                )}
-
-                {item.source && !isSelectMode && (
-                  <div className={cn(
-                    "absolute bottom-2 left-2 px-1.5 py-0.5 rounded-md flex items-center gap-1 backdrop-blur-md border border-white/20 shadow-sm z-10",
-                    item.source === 'owned' ? "bg-emerald-500/80 text-white" : "bg-amber-500/80 text-white"
-                  )}>
-                    {item.source === 'owned' ? <User size={8} /> : <Bookmark size={8} />}
-                    <span className="text-[7px] font-black uppercase tracking-wider">
-                      {item.source === 'owned' ? t('source_owned') : t('source_inspiration')}
-                    </span>
-                  </div>
-                )}
-                
-                {!isSelectMode && (
+              {/* Chat Input */}
+              <div className="p-4 border-t border-black/5 bg-stone-50/50">
+                <div className="relative">
+                  <input 
+                    type="text" 
+                    value={chatInput}
+                    onChange={(e) => setChatInput(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                    placeholder={t('chat_placeholder')}
+                    className="w-full bg-white border border-black/10 rounded-2xl py-4 pl-6 pr-14 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600/20 transition-all shadow-sm"
+                  />
                   <button 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onRemoveItem(item.id);
-                    }}
-                    className="absolute top-2 right-2 p-1.5 bg-white/80 backdrop-blur-md rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity text-red-500 hover:bg-red-50 z-10"
+                    onClick={handleSendMessage}
+                    disabled={!chatInput.trim() || isChatLoading}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-2.5 bg-indigo-600 text-white rounded-xl shadow-lg shadow-indigo-200 disabled:opacity-50 disabled:shadow-none transition-all active:scale-95"
                   >
-                    <Trash2 size={12} />
+                    <Send size={18} />
                   </button>
-                )}
-                
-                {(!isSelectMode && (item.category === 'Media' ? selectedModel?.id === item.id : canvasItems.find(i => i.id === item.id))) && (
-                  <div className="absolute -top-1 -right-1 bg-indigo-600 text-white rounded-full p-0.5 shadow-lg">
-                    <Sparkles size={8} />
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-
-        </div>
-      </motion.div>
-
-      {/* Share Modal */}
-      <AnimatePresence>
-        {isShareModalOpen && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[1000] flex items-end justify-center"
-            onClick={() => setIsShareModalOpen(false)}
-          >
-            <motion.div 
-              initial={{ y: '100%' }}
-              animate={{ y: 0 }}
-              exit={{ y: '100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="bg-white w-full max-w-md rounded-t-[40px] p-8 pb-12 shadow-2xl max-h-[85vh] overflow-y-auto no-scrollbar"
-              onClick={e => e.stopPropagation()}
-            >
-              <div className="w-12 h-1.5 bg-black/10 rounded-full mx-auto mb-8" />
-              <h3 className="text-center font-black text-lg mb-8">{t('share_title')}</h3>
-              
-              {/* Social Links */}
-              <div className="grid grid-cols-5 gap-4 mb-10">
-                {[
-                  { name: t('share_copy'), icon: <Layers size={20} />, color: 'bg-gray-100' },
-                  { name: 'Line', icon: <Sparkles size={20} />, color: 'bg-green-500 text-white' },
-                  { name: 'FB', icon: <Layout size={20} />, color: 'bg-blue-600 text-white' },
-                  { name: 'IG', icon: <Camera size={20} />, color: 'bg-pink-500 text-white' },
-                  { name: t('share_more'), icon: <Share size={20} />, color: 'bg-gray-100' }
-                ].map(social => (
-                  <div key={social.name} className="flex flex-col items-center gap-2">
-                    <button className={cn("w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm active:scale-90 transition-transform", social.color)}>
-                      {social.icon}
-                    </button>
-                    <span className="text-[10px] font-bold text-black/40">{social.name}</span>
-                  </div>
-                ))}
-              </div>
-
-              {/* Actions */}
-              <div className="space-y-3">
-                <button 
-                  onClick={() => {
-                    onPublish([...(selectedModel ? [selectedModel] : []), ...canvasItems]);
-                    setIsShareModalOpen(false);
-                  }}
-                  className="w-full flex items-center justify-between p-4 bg-emerald-500 text-white rounded-2xl hover:bg-emerald-600 transition-colors group shadow-lg shadow-emerald-500/20"
-                >
-                  <div className="flex items-center gap-3">
-                    <Sparkles size={18} />
-                    <span className="font-bold text-sm">{t('share_publish')}</span>
-                  </div>
-                  <ChevronRight size={18} className="opacity-50" />
-                </button>
-
-                <button 
-                  onClick={handleAnalyzeOutfit}
-                  className="w-full flex items-center justify-between p-4 bg-indigo-500 text-white rounded-2xl hover:bg-indigo-600 transition-colors group shadow-lg shadow-indigo-500/20"
-                >
-                  <div className="flex items-center gap-3">
-                    <Bot size={18} />
-                    <span className="font-bold text-sm">{t('share_ai_assistant')}</span>
-                  </div>
-                  <ChevronRight size={18} className="opacity-50" />
-                </button>
-
-                {[
-                  { name: t('share_favorites'), icon: <Heart size={18} />, onClick: () => {
-                    onSaveCreation(canvasItems);
-                    setIsShareModalOpen(false);
-                    setAlertMessage("已儲存穿搭至我的衣櫥！");
-                  }},
-                  { name: t('share_download'), icon: <PlusSquare size={18} />, onClick: () => {} },
-                  { name: t('share_files'), icon: <Bookmark size={18} />, onClick: () => {} }
-                ].map(action => (
+                </div>
+                <div className="mt-3 flex justify-center">
                   <button 
-                    key={action.name} 
-                    onClick={action.onClick}
-                    className="w-full flex items-center justify-between p-4 bg-black/5 rounded-2xl hover:bg-black/10 transition-colors group"
+                    onClick={() => window.open('https://gemini.google.com/gem/10bJC9GZg4W6gn-3tgB7nYLooZ2nwV7EN?usp=sharing', '_blank')}
+                    className="text-[10px] font-bold text-indigo-600/60 hover:text-indigo-600 flex items-center gap-1 transition-colors"
+                  >
+                    <MessageSquare size={10} />
+                    Open Full Gemini Assistant
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Crop Modal */}
+        {itemToCrop && (
+          <ImageCropModal 
+            image={itemToCrop.imageUrl}
+            onClose={() => setItemToCrop(null)}
+            onConfirm={(croppedUrl: string) => {
+              setCanvasItems((prev: any) => prev.map((i: any) => i.id === itemToCrop.id ? { ...i, imageUrl: croppedUrl } : i));
+              setItemToCrop(null);
+            }}
+          />
+        )}
+
+        {/* Swipeable Closet Panel & Zoom Indicator Group */}
+        <motion.div 
+          initial={false}
+          animate={{ y: closetY }}
+          transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+          className="fixed top-0 left-0 right-0 z-[60] flex flex-col h-screen"
+        >
+          {/* The Beige Panel */}
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-[#D9CDBF] rounded-t-[40px] shadow-[0_-10px_40px_rgba(0,0,0,0.1)] flex flex-col h-full"
+          >
+            {/* Drag Handle / Swipe Trigger - Now Tab to Open */}
+            <div 
+              onClick={handleToggleCloset}
+              className="w-full py-4 flex justify-center cursor-pointer shrink-0 hover:bg-black/5 transition-colors rounded-t-[40px]"
+            >
+              <div className="w-12 h-1.5 bg-black/20 rounded-full" />
+            </div>
+
+            {/* Category Tabs (Reverted to original design: Tops, Bottoms, Accessories, Model) */}
+            <div className={cn(
+              "flex justify-start items-center gap-1 mb-4 px-6 shrink-0 transition-opacity duration-200 overflow-x-auto no-scrollbar touch-pan-x",
+              closetState === 'closed' ? "opacity-0 pointer-events-none" : "opacity-100"
+            )}>
+
+              {[
+                { id: 'All', label: t('closet_all') },
+                { id: 'Tops', label: t('closet_tops') },
+                { id: 'Bottoms', label: t('closet_bottoms') },
+                { id: 'Shoes', label: t('closet_shoes') },
+                { id: 'Accessories', label: t('closet_accessories') }
+              ].map(cat => (
+                <button 
+                  key={cat.id} 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveCategory(cat.id as any);
+                  }}
+                  className={cn(
+                    "flex items-center gap-1 px-8 py-2 rounded-full text-[10px] font-bold transition-all border border-transparent whitespace-nowrap shrink-0",
+                    activeCategory === cat.id 
+                      ? "bg-black text-white shadow-lg" 
+                      : "bg-white/40 text-black/60 hover:bg-white/80"
+                  )}
+                >
+                  {cat.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Item Grid */}
+            <div className={cn(
+              "grid grid-cols-2 gap-3 overflow-y-auto no-scrollbar px-4 pb-48 flex-1 transition-opacity duration-200",
+              closetState === 'closed' ? "opacity-0 pointer-events-none" : "opacity-100"
+            )}>
+              {filteredWardrobe.map((item: any) => (
+                <div 
+                  key={item.id} 
+                  role="button"
+                  tabIndex={0}
+                  draggable={!isSelectMode}
+                  onDragStart={(e) => !isSelectMode && handleDragStart(e, item)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (isSelectMode) {
+                      if (selectedIds.includes(item.id)) {
+                        setSelectedIds((prev: any) => prev.filter((id: string) => id !== item.id));
+                      } else if (selectedIds.length < 5) {
+                        setSelectedIds((prev: any) => [...prev, item.id]);
+                      }
+                    } else {
+                      addToCanvas(item);
+                    }
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      if (!isSelectMode) addToCanvas(item);
+                    }
+                  }}
+                  className={cn(
+                    "aspect-square bg-transparent rounded-2xl p-2 shadow-sm transition-all group relative border-2 cursor-pointer",
+                    isSelectMode
+                      ? selectedIds.includes(item.id) 
+                        ? "border-indigo-600 scale-[0.98] shadow-lg shadow-indigo-100/50" 
+                        : "border-transparent"
+                      : item.category === 'Media' 
+                        ? selectedModel?.id === item.id ? "border-indigo-600 scale-105" : "border-transparent"
+                        : canvasItems.find((i: any) => i.id === item.id) ? "border-indigo-600 scale-105" : "border-transparent",
+                    !isSelectMode && "active:scale-95"
+                  )}
+                >
+                  <ClothingImage 
+                    src={item.imageUrl} 
+                    alt={item.name} 
+                    className={cn(
+                      "w-full h-full p-2 transition-transform duration-500", 
+                      item.category === 'Media' ? "object-cover rounded-xl" : "object-contain drop-shadow-md",
+                      !isSelectMode && "group-hover:scale-110"
+                    )} 
+                  />
+
+                  {isSelectMode && selectedIds.includes(item.id) && (
+                    <div className="absolute top-2 right-2 bg-indigo-600 text-white w-6 h-6 rounded-full flex items-center justify-center font-black text-[10px] shadow-lg border-2 border-white z-20">
+                      {selectedIds.indexOf(item.id) + 1}
+                    </div>
+                  )}
+
+                  {item.source && !isSelectMode && (
+                    <div className={cn(
+                      "absolute bottom-2 left-2 px-1.5 py-0.5 rounded-md flex items-center gap-1 backdrop-blur-md border border-white/20 shadow-sm z-10",
+                      item.source === 'owned' ? "bg-emerald-500/80 text-white" : "bg-amber-500/80 text-white"
+                    )}>
+                      <User size={8} />
+                      <span className="text-[7px] font-black uppercase tracking-wider">
+                        {item.source === 'owned' ? t('source_owned') : t('source_inspiration')}
+                      </span>
+                    </div>
+                  )}
+                  
+                  {!isSelectMode && (
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onRemoveItem(item.id);
+                      }}
+                      className="absolute top-2 right-2 p-1.5 bg-white/80 backdrop-blur-md rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity text-red-500 hover:bg-red-50 z-10"
+                    >
+                      <Trash2 size={12} />
+                    </button>
+                  )}
+                  
+                  {(!isSelectMode && (item.category === 'Media' ? selectedModel?.id === item.id : canvasItems.find((i: any) => i.id === item.id))) && (
+                    <div className="absolute -top-1 -right-1 bg-indigo-600 text-white rounded-full p-0.5 shadow-lg">
+                      <Sparkles size={8} />
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Share Modal */}
+        <AnimatePresence>
+          {isShareModalOpen && (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[1000] flex items-end justify-center"
+              onClick={() => setIsShareModalOpen(false)}
+            >
+              <motion.div 
+                initial={{ y: '100%' }}
+                animate={{ y: 0 }}
+                exit={{ y: '100%' }}
+                transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                className="bg-white w-full max-w-md rounded-t-[40px] p-8 pb-12 shadow-2xl max-h-[85vh] overflow-y-auto no-scrollbar"
+                onClick={e => e.stopPropagation()}
+              >
+                <div className="w-12 h-1.5 bg-black/10 rounded-full mx-auto mb-8" />
+                <h3 className="text-center font-black text-lg mb-8">{t('share_title')}</h3>
+                
+                {/* Social Links */}
+                <div className="grid grid-cols-5 gap-4 mb-10">
+                  {[
+                    { name: t('share_copy'), icon: <Layers size={20} />, color: 'bg-gray-100' },
+                    { name: 'Line', icon: <Sparkles size={20} />, color: 'bg-green-500 text-white' },
+                    { name: 'FB', icon: <Layout size={20} />, color: 'bg-blue-600 text-white' },
+                    { name: 'IG', icon: <Camera size={20} />, color: 'bg-pink-500 text-white' },
+                    { name: t('share_more'), icon: <Share size={20} />, color: 'bg-gray-100' }
+                  ].map(social => (
+                    <div key={social.name} className="flex flex-col items-center gap-2">
+                      <button className={cn("w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm active:scale-90 transition-transform", social.color)}>
+                        {social.icon}
+                      </button>
+                      <span className="text-[10px] font-bold text-black/40">{social.name}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Actions */}
+                <div className="space-y-3">
+                  <button 
+                    onClick={() => {
+                      onPublish([...(selectedModel ? [selectedModel] : []), ...canvasItems]);
+                      setIsShareModalOpen(false);
+                    }}
+                    className="w-full flex items-center justify-between p-4 bg-emerald-500 text-white rounded-2xl hover:bg-emerald-600 transition-colors group shadow-lg shadow-emerald-500/20"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="text-black/40 group-hover:text-black transition-colors">{action.icon}</div>
-                      <span className="font-bold text-sm">{action.name}</span>
+                      <Sparkles size={18} />
+                      <span className="font-bold text-sm">{t('share_publish')}</span>
                     </div>
-                    <ChevronRight size={18} className="text-black/20" />
+                    <ChevronRight size={18} className="opacity-50" />
                   </button>
+
+                  <button 
+                    onClick={handleAnalyzeOutfit}
+                    className="w-full flex items-center justify-between p-4 bg-indigo-500 text-white rounded-2xl hover:bg-indigo-600 transition-colors group shadow-lg shadow-indigo-500/20"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Bot size={18} />
+                      <span className="font-bold text-sm">{t('share_ai_assistant')}</span>
+                    </div>
+                    <ChevronRight size={18} className="opacity-50" />
+                  </button>
+
+                  {[
+                    { name: t('share_favorites'), icon: <Heart size={18} />, onClick: () => {
+                      onSaveCreation(canvasItems);
+                      setIsShareModalOpen(false);
+                      setAlertMessage("已儲存穿搭至我的衣櫥！");
+                    }},
+                    { name: t('share_download'), icon: <PlusSquare size={18} />, onClick: () => {} },
+                    { name: t('share_files'), icon: <Bookmark size={18} />, onClick: () => {} }
+                  ].map(action => (
+                    <button 
+                      key={action.name} 
+                      onClick={action.onClick}
+                      className="w-full flex items-center justify-between p-4 bg-black/5 rounded-2xl hover:bg-black/10 transition-colors group"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="text-black/40 group-hover:text-black transition-colors">{action.icon}</div>
+                        <span className="font-bold text-sm">{action.name}</span>
+                      </div>
+                      <ChevronRight size={18} className="text-black/20" />
+                    </button>
+                  ))}
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Loading Overlay */}
+        <AnimatePresence>
+          {isAnalyzingOutfit && (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[1100] bg-white/60 backdrop-blur-md flex flex-col items-center justify-center p-8 text-center"
+            >
+              <div className="relative mb-8">
+                <motion.div 
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                  className="w-24 h-24 rounded-full border-t-2 border-indigo-500/20"
+                  style={{ position: 'relative' }}
+                />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <motion.div
+                    animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                    className="text-indigo-600"
+                  >
+                    <Sparkles size={40} />
+                  </motion.div>
+                </div>
+              </div>
+              <h2 className="text-xl font-black mb-2">{t('analyzing_outfit')}</h2>
+              <div className="flex gap-1">
+                {[0, 1, 2].map(i => (
+                  <motion.div
+                    key={i}
+                    animate={{ y: [0, -6, 0] }}
+                    transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.1 }}
+                    className="w-1.5 h-1.5 bg-indigo-600 rounded-full"
+                  />
                 ))}
               </div>
             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <AnimatePresence>
-        {isAnalyzingOutfit && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[1100] bg-white/60 backdrop-blur-md flex flex-col items-center justify-center p-8 text-center"
-          >
-            <div className="relative mb-8">
-              <motion.div 
-                animate={{ rotate: 360 }}
-                transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
-                className="w-24 h-24 rounded-full border-t-2 border-indigo-500/20"
-              />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <motion.div
-                  animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                  className="text-indigo-600"
-                >
-                  <Sparkles size={40} />
-                </motion.div>
-              </div>
-            </div>
-            <h2 className="text-xl font-black mb-2">{t('analyzing_outfit')}</h2>
-            <div className="flex gap-1">
-              {[0, 1, 2].map(i => (
-                <motion.div
-                  key={i}
-                  animate={{ y: [0, -6, 0] }}
-                  transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.1 }}
-                  className="w-1.5 h-1.5 bg-indigo-600 rounded-full"
-                />
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-};
+          )}
+        </AnimatePresence>
+      </div>
+    );
+  };
 const ProfileView = ({ 
   wardrobe, 
   creations, 

@@ -1,47 +1,50 @@
-
 import re
 
-def check_tags(filepath):
-    with open(filepath, 'r') as f:
-        content = f.read()
-    
-    # Very simple regex to find <tag and </tag
-    # This won't handle everything (like fragments <>, comments, strings) but it's a start
-    opens = re.findall(r'<([a-zA-Z.]+)', content)
-    closes = re.findall(r'</([a-zA-Z.]+)', content)
-    self_closing = re.findall(r'<([a-zA-Z.]+)[^>]*/>', content)
-    
-    # Filter out self-closing from opens if they were caught
-    # (Actually better to use a stack)
+def check_jsx_balance(file_path):
+    with open(file_path, 'r') as f:
+        lines = f.readlines()
     
     stack = []
-    # More precise logic: find all <tag, /> and </tag
-    tokens = re.findall(r'</?[a-zA-Z.]+|/>', content)
+    # Simplified regex for tags, ignoring props for now
+    tag_re = re.compile(r'<(/?)([a-zA-Z0-9\.]+)')
     
-    errors = []
-    for token in tokens:
-        if token == '/>':
-            if stack:
-                stack.pop()
-        elif token.startswith('</'):
-            tag = token[2:]
-            if not stack:
-                errors.append(f"Unexpected close tag: {token}")
-            else:
-                last_tag = stack.pop()
-                if last_tag != tag:
-                    errors.append(f"Mismatched tag: expected </{last_tag}>, found {token}")
-        else:
-            tag = token[1:]
-            stack.append(tag)
-            
-    if stack:
-        errors.append(f"Unclosed tags: {stack}")
+    in_comment = False
+    
+    for i, line in enumerate(lines):
+        line_num = i + 1
+        # Ignored commented lines or parts
+        if '/*' in line and '*/' in line:
+            line = re.sub(r'/\*.*?\*/', '', line)
+        if '/*' in line: in_comment = True
+        if '*/' in line: 
+            in_comment = False
+            continue
+        if in_comment or line.strip().startswith('//'): continue
         
-    return errors
+        # Also clean up the line to avoid string literal contents messing up tags
+        line = re.sub(r'".*?"', '""', line)
+        line = re.sub(r"'.*?'", "''", line)
+        
+        for match in tag_re.finditer(line):
+            is_closing = match.group(1) == '/'
+            tag_name = match.group(2)
+            
+            # Ignore self-closing tags like <br/> or <img> or <div />
+            if not is_closing and (line[match.end():].lstrip().startswith('/>') or tag_name in ['img', 'br', 'hr', 'input']):
+                continue
+                
+            if is_closing:
+                if not stack:
+                    print(f"Error: Unexpected closing tag </{tag_name}> at line {line_num}")
+                else:
+                    last_tag, last_line = stack.pop()
+                    if last_tag != tag_name:
+                        print(f"Error: Mismatched tag. Opened <{last_tag}> at line {last_line}, but closed </{tag_name}> at line {line_num}")
+            else:
+                stack.append((tag_name, line_num))
+    
+    for tag, line in stack:
+        print(f"Error: Unclosed tag <{tag}> opened at line {line}")
 
 if __name__ == "__main__":
-    import sys
-    res = check_tags('/Users/yangyihong/Downloads/awr/src/App.tsx')
-    for e in res:
-        print(e)
+    check_jsx_balance('/Users/yangyihong/Downloads/awr/src/App.tsx')
