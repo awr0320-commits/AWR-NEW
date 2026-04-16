@@ -1,0 +1,7 @@
+{
+  "name": "AWR",
+  "description": "A high-end fashion app providing a special dress code for you anywhere you go.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
