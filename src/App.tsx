@@ -1792,9 +1792,8 @@ const WorkshopView = ({ items, onSaveCreation, onPublish, onRemoveItem, isRateLi
               >
                 <Trash2 size={10} />
               </button>
-            </motion.div>
-          ))}
-        </div>
+          </motion.div>
+        ))}
       </div>
 
 
@@ -1912,8 +1911,11 @@ const WorkshopView = ({ items, onSaveCreation, onPublish, onRemoveItem, isRateLi
                 <X size={16} />
               </button>
             </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-        {/* UI Overlay Elements */}
+      {/* UI Overlay Elements */}
         {/* Removed aiAdvice overlay as it is now integrated into chat */}
 
         <div className="absolute top-8 left-6 right-6 flex items-start justify-between z-50 pointer-events-none">
