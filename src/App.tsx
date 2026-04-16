@@ -1795,6 +1795,7 @@ const WorkshopView = ({ items, onSaveCreation, onPublish, onRemoveItem, isRateLi
           </motion.div>
         ))}
       </div>
+    </div>
 
 
       {/* Floating Toolbar (Collapsible - Centered Top) */}

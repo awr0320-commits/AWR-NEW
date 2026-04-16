@@ -204,7 +204,7 @@ export async function getWeeklyFashionReport(weeklyOutfits: ClothingItem[][], la
 1. 從上述「知識庫」中挑選「最符合該週穿搭情境」的一個主題作為知識卡內容（knowledge）。每週應呈現不同的教學重點。
 2. 從「每週金句資源庫」中隨機挑選一句話作為金句內容（quote）。
 
-請務必使用用戶指定的語言 (\${language === 'zh' ? '繁體中文' : 'English'}) 進行回應，並嚴格遵守 JSON 格式回應。
+請務必使用用戶指定的語言 (${language === 'zh' ? '繁體中文' : 'English'}) 進行回應，並嚴格遵守 JSON 格式回應。
       `,
       }
     }));
