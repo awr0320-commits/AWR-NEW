@@ -1020,11 +1020,16 @@ const WardrobeView = ({ items, onAddItem, onUpdateItem, onRemoveItem, isRateLimi
       const base64 = event.target?.result as string;
       const category: Category = activeCategory !== 'All' ? activeCategory : 'Tops';
 
+      // Use a temporary unique name for Storage
+      const fileExt = file.name.split('.').pop() || 'png';
+      const fileName = `item-${Date.now()}.${fileExt}`;
+      const filePath = `wardrobe/${fileName}`;
+
       const newItem: ClothingItem = {
         id: Math.random().toString(),
         name: file.name.split('.')[0],
         category: category,
-        imageUrl: base64,
+        imageUrl: base64, // local first
         tags: ['uploaded'],
         isCleaned: false,
         source: 'owned'
@@ -1032,7 +1037,7 @@ const WardrobeView = ({ items, onAddItem, onUpdateItem, onRemoveItem, isRateLimi
       
       onAddItem(newItem);
       if (activeCategory === 'All') {
-        setActiveCategory('Tops'); // Switch to Tops so the user sees where it went
+        setActiveCategory('Tops');
       }
     };
     reader.readAsDataURL(file);
@@ -4199,11 +4204,31 @@ export default function App() {
     }
   };
 
-  const handleUploadTodayPhoto = (imageUrl: string) => {
+  const handleUploadTodayPhoto = async (imageUrl: string) => {
+    let finalUrl = imageUrl;
+    try {
+      if (imageUrl.startsWith('data:')) {
+        const res = await fetch('/api/upload', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            image: imageUrl, 
+            path: `daily-outfits/daily-${Date.now()}.png` 
+          }),
+        });
+        if (res.ok) {
+          const { url } = await res.json();
+          finalUrl = url;
+        }
+      }
+    } catch (e) {
+      console.error("Failed to upload daily photo to cloud:", e);
+    }
+
     const newItem: ClothingItem = {
       id: `daily-${Date.now()}`,
       name: 'Daily Outfit',
-      imageUrl,
+      imageUrl: finalUrl,
       category: 'Outfits',
       tags: [],
       source: 'owned'
@@ -4218,13 +4243,33 @@ export default function App() {
   const handlePublish = async (items: ClothingItem[]) => {
     if (items.length === 0) return;
     
+    let finalImageUrl = items[0].imageUrl;
+    try {
+      if (finalImageUrl.startsWith('data:')) {
+        const res = await fetch('/api/upload', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            image: finalImageUrl, 
+            path: `creations/creation-${Date.now()}.png` 
+          }),
+        });
+        if (res.ok) {
+          const { url } = await res.json();
+          finalImageUrl = url;
+        }
+      }
+    } catch (e) {
+      console.error("Failed to upload creation image to cloud:", e);
+    }
+    
     const newPost: Post = {
       id: Math.random().toString(36).substr(2, 9),
       author: {
         name: userProfile.name,
         avatar: userProfile.avatar
       },
-      imageUrl: items[0].imageUrl, // Use the first item's image as a placeholder for the collage
+      imageUrl: finalImageUrl,
       likes: 0,
       description: `My new creation with ${items.length} items!`,
       tags: items.map(i => i.category).filter((v, i, a) => a.indexOf(v) === i)
@@ -4248,6 +4293,26 @@ export default function App() {
   };
 
   const handleUploadPost = async (postData: Omit<Post, 'id' | 'author' | 'likes'>) => {
+    let finalImageUrl = postData.imageUrl;
+    try {
+      if (finalImageUrl.startsWith('data:')) {
+        const res = await fetch('/api/upload', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            image: finalImageUrl, 
+            path: `posts/post-${Date.now()}.png` 
+          }),
+        });
+        if (res.ok) {
+          const { url } = await res.json();
+          finalImageUrl = url;
+        }
+      }
+    } catch (e) {
+      console.error("Failed to upload post image to cloud:", e);
+    }
+
     const newPost: Post = {
       id: Math.random().toString(36).substr(2, 9),
       author: {
@@ -4255,7 +4320,8 @@ export default function App() {
         avatar: userProfile.avatar
       },
       likes: 0,
-      ...postData
+      ...postData,
+      imageUrl: finalImageUrl
     };
     
     // Optimistic UI update

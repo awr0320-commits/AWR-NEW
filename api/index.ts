@@ -19,6 +19,41 @@ const supabase = (supabaseUrl && supabaseKey)
   ? createClient(supabaseUrl, supabaseKey)
   : null;
 
+// === UPLOAD ENDPOINT ===
+
+app.post('/api/upload', async (req, res) => {
+  if (!supabase) return res.status(500).json({ error: "DB not configured" });
+  
+  const { image, path: filePath } = req.body;
+  
+  try {
+    // Convert base64 to buffer
+    const base64Data = image.replace(/^data:image\/\w+;base64,/, "");
+    const buffer = Buffer.from(base64Data, 'base64');
+    const contentType = image.match(/^data:(image\/\w+);base64,/)?.[1] || 'image/png';
+    
+    const { data: uploadData, error: uploadError } = await supabase
+      .storage
+      .from('images')
+      .upload(filePath, buffer, {
+        contentType,
+        upsert: true
+      });
+
+    if (uploadError) throw uploadError;
+
+    const { data: { publicUrl } } = supabase
+      .storage
+      .from('images')
+      .getPublicUrl(filePath);
+
+    res.json({ url: publicUrl });
+  } catch (error: any) {
+    console.error("[Upload Error]", error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // === CLOTHING ITEMS ENDPOINTS ===
 
 app.get('/api/items', async (req, res) => {

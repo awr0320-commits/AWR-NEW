@@ -30,21 +30,34 @@ export const WardrobeProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const addItem = async (item: ClothingItem) => {
     try {
-      // Prevent adding duplicate image URLs locally first
-      if (items.some(i => i.imageUrl === item.imageUrl)) {
-        console.warn('Item with this image already exists in wardrobe.');
-        return;
+      // 1. Upload to Supabase Storage first if it's a new upload (data URL)
+      let finalImageUrl = item.imageUrl;
+      if (item.imageUrl.startsWith('data:')) {
+        const fileExt = item.imageUrl.match(/\/(\w+);base64/)?.[1] || 'png';
+        const fileName = `item-${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
+        const filePath = `wardrobe/${fileName}`;
+        
+        const uploadRes = await fetch('/api/upload', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ image: item.imageUrl, path: filePath }),
+        });
+        
+        if (!uploadRes.ok) throw new Error('Cloud upload failed');
+        const { url } = await uploadRes.json();
+        finalImageUrl = url;
       }
       
+      // 2. Save metadata with cloud URL
       const res = await fetch('/api/items', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(item),
+        body: JSON.stringify({ ...item, imageUrl: finalImageUrl }),
       });
       
-      if (!res.ok) throw new Error('Failed to save item');
+      if (!res.ok) throw new Error('Failed to save item metadata');
       const savedItem = await res.json();
-      setItems(prev => [savedItem, ...prev]);
+      setItems(prev => [{ ...item, imageUrl: finalImageUrl, id: savedItem.id }, ...prev]);
     } catch (error) {
       console.error("Error saving item:", error);
     }
