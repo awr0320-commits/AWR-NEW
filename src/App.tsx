@@ -1278,6 +1278,7 @@ const WorkshopView = ({ items, onSaveCreation, onPublish, onRemoveItem, isRateLi
     weight: 1.0
   });
   const [isMannequinControlsOpen, setIsMannequinControlsOpen] = useState(false);
+  const [isMannequinPanelOpen, setIsMannequinPanelOpen] = useState(false);
   const [modelMode, setModelMode] = useState<'3D' | '2D'>('2D');
   const [isToolbarExpanded, setIsToolbarExpanded] = useState(true);
   const [chatMessages, setChatMessages] = useState<{ role: 'user' | 'model', text: string }[]>([
@@ -1799,99 +1800,52 @@ const WorkshopView = ({ items, onSaveCreation, onPublish, onRemoveItem, isRateLi
     </div>
 
 
-      {/* Floating Toolbar (Collapsible - Centered Top) */}
-      <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50">
+      {/* Minimalist Pill-shaped Floating Toolbar (Centered Top) */}
+      <div className="fixed top-8 left-1/2 -translate-x-1/2 z-50">
         <motion.div 
           layout
-          initial={false}
-          animate={{
-            width: isToolbarExpanded ? 'auto' : '48px',
-          }}
-          className={cn(
-            "bg-white/95 backdrop-blur-2xl border border-black/10 shadow-2xl flex items-center overflow-hidden h-[52px] ring-1 ring-black/5",
-            isToolbarExpanded ? "px-6 rounded-full gap-8" : "justify-center rounded-full cursor-pointer hover:bg-white transition-all duration-300"
-          )}
-          onClick={() => !isToolbarExpanded && setIsToolbarExpanded(true)}
+          className="bg-white/90 backdrop-blur-2xl border border-black/5 shadow-2xl h-[60px] rounded-full px-5 flex items-center gap-6"
         >
-          {!isToolbarExpanded ? (
-            <motion.div layout>
-              <Wrench size={24} className="text-indigo-600" />
-            </motion.div>
-          ) : (
-            <motion.div 
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="flex items-center gap-8"
-            >
-              <button 
-                onClick={handleAiSuggest} 
-                className={cn("hover:text-black transition-colors shrink-0", isGenerating && "animate-pulse text-indigo-600")} 
-                title={t('workshop_ai_suggest')}
-              >
-                <Sparkles size={20} />
-              </button>
-              
-              <button 
-                onClick={() => {
-                  onShowHealthReminder();
-                  setIsChatOpen(!isChatOpen);
-                }} 
-                className={cn("transition-colors flex items-center gap-1.5 shrink-0", isChatOpen ? "text-indigo-600" : "hover:text-indigo-600")} 
-                title={t('workshop_ai_assistant')}
-              >
-                <Bot size={20} />
-              </button>
-              
-              <div className="relative shrink-0">
-                <button 
-                  onClick={() => setIsMannequinControlsOpen(!isMannequinControlsOpen)}
-                  className={cn("transition-colors flex items-center gap-2", isMannequinControlsOpen ? "text-indigo-600" : "hover:text-black")} 
-                  title="調整身材"
-                >
-                  <User size={20} />
-                </button>
-              </div>
+          <button 
+            onClick={handleAiSuggest} 
+            className={cn("p-2 transition-all active:scale-90", isGenerating ? "text-indigo-600 animate-pulse" : "text-black/60 hover:text-black")} 
+            title={t('workshop_ai_suggest')}
+          >
+            <Sparkles size={22} strokeWidth={1.5} />
+          </button>
+          
+          <button 
+            onClick={() => {
+              onShowHealthReminder();
+              setIsChatOpen(!isChatOpen);
+            }} 
+            className={cn("p-2 transition-all active:scale-90", isChatOpen ? "text-indigo-600" : "text-black/60 hover:text-indigo-600")} 
+          >
+            <Bot size={22} strokeWidth={1.5} />
+          </button>
+          
+          <button 
+            onClick={() => setIsMannequinPanelOpen(!isMannequinPanelOpen)}
+            className={cn("p-2 transition-all active:scale-90", isMannequinPanelOpen ? "text-indigo-600" : "text-black/60 hover:text-black")} 
+          >
+            <User size={22} strokeWidth={1.5} />
+          </button>
 
-              <button 
-                onClick={() => setIsShareModalOpen(true)} 
-                className="hover:text-black transition-colors shrink-0" 
-                title={t('workshop_share')}
-              >
-                <Share size={20} />
-              </button>
+          <button 
+            onClick={() => setIsShareModalOpen(true)} 
+            className="p-2 text-black/60 hover:text-black transition-all active:scale-90" 
+          >
+            <Share size={22} strokeWidth={1.5} />
+          </button>
 
-              {selectedItemId && (
-                <div className="flex items-center gap-3 px-2 border-l border-black/10">
-                  <span className="text-[10px] font-black uppercase text-black/40">Size</span>
-                  <input 
-                    type="range" 
-                    min="0.2" 
-                    max="5" 
-                    step="0.1" 
-                    value={canvasItems.find(i => i.id === selectedItemId)?.scale || 1}
-                    onChange={(e) => {
-                      const newScale = parseFloat(e.target.value);
-                      setCanvasItems(prev => prev.map(i => i.id === selectedItemId ? { ...i, scale: newScale } : i));
-                    }}
-                    className="w-24 h-1.5 bg-indigo-100 rounded-lg appearance-none cursor-pointer accent-indigo-600"
-                  />
-                </div>
-              )}
+          <div className="w-px h-6 bg-black/5 mx-1" />
 
-              <div className="w-px h-4 bg-black/10 mx-1 shrink-0" />
-
-              <button 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsToolbarExpanded(false);
-                }}
-                className="hover:text-indigo-600 transition-colors p-1 shrink-0"
-                title="縮小工具欄"
-              >
-                <X size={16} />
-              </button>
-            </motion.div>
-          )}
+          <button 
+            onClick={() => setActiveTab('main')}
+            className="p-2 text-black/30 hover:text-red-500 transition-all active:scale-90"
+          >
+            <X size={22} strokeWidth={1.2} />
+          </button>
         </motion.div>
       </div>
 
@@ -1922,37 +1876,6 @@ const WorkshopView = ({ items, onSaveCreation, onPublish, onRemoveItem, isRateLi
 
         <div className="absolute top-8 left-6 right-6 flex items-start justify-between z-50 pointer-events-none">
           <div className="flex flex-col gap-3 pointer-events-auto">
-          </div>
-
-          <div className="flex flex-col items-end gap-3 pointer-events-auto">
-            <div className="flex items-center gap-2">
-              <button 
-                onClick={() => setModelMode((m: string) => m === '2D' ? '3D' : '2D')}
-                className="px-4 py-2 bg-black text-white rounded-full text-[10px] font-black uppercase tracking-widest shadow-xl flex items-center gap-2 active:scale-95 transition-all"
-              >
-                {modelMode === '2D' ? <Box size={14}/> : <Layout size={14}/>}
-                {modelMode === '2D' ? "3D Mode" : "2D Mode"}
-              </button>
-
-              <button 
-                onClick={() => setIsShareModalOpen(true)}
-                className="px-6 py-3 bg-indigo-600 text-white rounded-full text-[10px] font-black uppercase tracking-widest shadow-xl shadow-indigo-200 flex items-center gap-2 active:scale-95 transition-all"
-              >
-                <Share size={14} />
-                {t('workshop_upload_btn')}
-              </button>
-            </div>
-
-            {/* Model customization trigger */}
-            <button 
-              onClick={() => setIsMannequinPanelOpen(!isMannequinPanelOpen)}
-              className={cn(
-                "p-3 rounded-2xl shadow-lg backdrop-blur-xl border transition-all active:scale-90",
-                isMannequinPanelOpen ? "bg-black text-white border-black" : "bg-white/80 text-black border-black/5"
-              )}
-            >
-              <User size={20} />
-            </button>
           </div>
         </div>
 
@@ -1994,116 +1917,167 @@ const WorkshopView = ({ items, onSaveCreation, onPublish, onRemoveItem, isRateLi
           </div>
         </div>
 
-        {/* Side Panel (Mannequin Customization) */}
+        {/* Bottom Card Modal (Mannequin Customization) */}
         <AnimatePresence>
           {isMannequinPanelOpen && (
-            <motion.div 
-              initial={{ x: '100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '100%' }}
-              className="fixed inset-y-0 right-0 w-80 bg-white/90 backdrop-blur-2xl z-[70] shadow-2xl border-l border-black/5 p-8 pt-24 overflow-y-auto no-scrollbar"
-            >
-              <div className="space-y-8">
-                <div>
-                  <h3 className="text-xs font-black uppercase tracking-[0.2em] text-black/30 mb-6">{t('workshop_model_settings')}</h3>
+            <>
+              {/* Backdrop */}
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setIsMannequinPanelOpen(false)}
+                className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[60]"
+              />
+              
+              <motion.div 
+                initial={{ y: '100%' }}
+                animate={{ y: 0 }}
+                exit={{ y: '100%' }}
+                className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-3xl z-[70] rounded-t-[40px] shadow-[-20px_0_60px_rgba(0,0,0,0.1)] border-t border-black/5 p-8 pb-32 overflow-y-auto no-scrollbar max-h-[85vh]"
+              >
+                <div className="max-w-md mx-auto relative">
+                  {/* Header */}
+                  <div className="flex items-center justify-between mb-8">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-indigo-50 rounded-xl text-indigo-600">
+                        <User size={18} />
+                      </div>
+                      <h3 className="text-sm font-black uppercase tracking-[0.1em] text-black">{t('workshop_body_controls_title')}</h3>
+                    </div>
+                    <button onClick={() => setIsMannequinPanelOpen(false)} className="p-2 bg-stone-100 rounded-full text-black/30 hover:text-black transition-colors">
+                      <X size={18} />
+                    </button>
+                  </div>
                   
-                  {/* Mannequin Type Toggle */}
-                  <div className="flex p-1 bg-stone-100 rounded-xl mb-6">
-                    <button 
-                      onClick={() => setMannequinType('procedural')}
-                      className={cn(
-                        "flex-1 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all",
-                        mannequinType === 'procedural' ? "bg-white text-black shadow-sm" : "text-black/40"
-                      )}
-                    >
-                      Real 3D
-                    </button>
-                    <button 
-                      onClick={() => setMannequinType('fbx')}
-                      className={cn(
-                        "flex-1 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all",
-                        mannequinType === 'fbx' ? "bg-white text-black shadow-sm" : "text-black/40"
-                      )}
-                    >
-                      Style FBX
-                    </button>
-                  </div>
+                  <div className="space-y-8">
+                    <div>
+                      {/* Mannequin Style Toggle (2D/3D Mode) */}
+                      <div className="flex p-1.5 bg-stone-100 rounded-2xl mb-4">
+                        <button 
+                          onClick={() => setModelMode('3D')}
+                          className={cn(
+                            "flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2",
+                            modelMode === '3D' ? "bg-white text-black shadow-md shadow-black/5" : "text-black/40"
+                          )}
+                        >
+                          <Box size={14} />
+                          3D {t('workshop_mannequin').replace('3D ', '')}
+                        </button>
+                        <button 
+                          onClick={() => setModelMode('2D')}
+                          className={cn(
+                            "flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2",
+                            modelMode === '2D' ? "bg-white text-black shadow-md shadow-black/5" : "text-black/40"
+                          )}
+                        >
+                          <Layout size={14} />
+                          2D {t('workshop_mannequin').replace('2D ', '').replace('3D ', '')}
+                        </button>
+                      </div>
 
-                  {/* Gender Toggle */}
-                  <div className="flex p-1 bg-stone-100 rounded-xl mb-6">
-                    <button 
-                      onClick={() => setMannequinParams((p: any) => ({ ...p, gender: 'male', height: 1.0 }))}
-                      className={cn(
-                        "flex-1 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all",
-                        mannequinParams.gender === 'male' ? "bg-white text-black shadow-sm" : "text-black/40"
+                      {/* Rendering Style if in 3D */}
+                      {modelMode === '3D' && (
+                        <div className="flex p-1 bg-stone-50 rounded-xl mb-6 border border-black/5">
+                          <button 
+                            onClick={() => setMannequinType('procedural')}
+                            className={cn(
+                              "flex-1 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all",
+                              mannequinType === 'procedural' ? "bg-white text-black shadow-sm" : "text-black/40"
+                            )}
+                          >
+                            Real 3D
+                          </button>
+                          <button 
+                            onClick={() => setMannequinType('fbx')}
+                            className={cn(
+                              "flex-1 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all",
+                              mannequinType === 'fbx' ? "bg-white text-black shadow-sm" : "text-black/40"
+                            )}
+                          >
+                            Style FBX
+                          </button>
+                        </div>
                       )}
-                    >
-                      {t('workshop_male')}
-                    </button>
-                    <button 
-                      onClick={() => setMannequinParams((p: any) => ({ ...p, gender: 'female', height: 163 / 175 }))}
-                      className={cn(
-                        "flex-1 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all",
-                        mannequinParams.gender === 'female' ? "bg-white text-black shadow-sm" : "text-black/40"
-                      )}
-                    >
-                      {t('workshop_female')}
-                    </button>
-                  </div>
 
-                  {/* Body Measurement Sliders */}
-                  <div className="grid grid-cols-2 gap-x-6 gap-y-3">
-                    {[
-                      { label: `${t('workshop_height')} (cm)`, key: 'height', min: 150, max: 200, base: 175 },
-                      { label: `${t('workshop_chest')} (cm)`, key: 'chest', min: 70, max: 120, base: 90 },
-                      { label: `${t('workshop_waist')} (cm)`, key: 'waist', min: 50, max: 100, base: 70 },
-                      { label: `${t('workshop_hips')} (cm)`, key: 'hips', min: 70, max: 120, base: 95 },
-                    ].map(slider => {
-                      const currentVal = (mannequinParams as any)[slider.key] * slider.base;
-                      return (
-                        <div key={slider.key} className="space-y-1.5">
-                          <div className="flex justify-between items-center">
-                            <label className="text-[8px] font-black uppercase tracking-widest text-black/40">{slider.label}</label>
-                            <span className="text-[8px] font-mono text-black/60">{currentVal.toFixed(0)}</span>
+                      {/* Gender Toggle */}
+                      <div className="flex p-1.5 bg-stone-100 rounded-2xl mb-8">
+                        <button 
+                          onClick={() => setMannequinParams((p: any) => ({ ...p, gender: 'male', height: 1.0 }))}
+                          className={cn(
+                            "flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
+                            mannequinParams.gender === 'male' ? "bg-white text-black shadow-md shadow-black/5" : "text-black/40"
+                          )}
+                        >
+                          {t('workshop_male')}
+                        </button>
+                        <button 
+                          onClick={() => setMannequinParams((p: any) => ({ ...p, gender: 'female', height: 163 / 175 }))}
+                          className={cn(
+                            "flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
+                            mannequinParams.gender === 'female' ? "bg-white text-black shadow-md shadow-black/5" : "text-black/40"
+                          )}
+                        >
+                          {t('workshop_female')}
+                        </button>
+                      </div>
+
+                      {/* Body Measurement Sliders */}
+                      <div className="grid grid-cols-2 gap-x-8 gap-y-6">
+                        {[
+                          { label: `${t('workshop_height')} (cm)`, key: 'height', min: 140, max: 200, base: 175 },
+                          { label: `${t('workshop_chest')} (cm)`, key: 'chest', min: 60, max: 130, base: 90 },
+                          { label: `${t('workshop_waist')} (cm)`, key: 'waist', min: 45, max: 110, base: 70 },
+                          { label: `${t('workshop_hips')} (cm)`, key: 'hips', min: 60, max: 130, base: 95 },
+                        ].map(slider => {
+                          const currentVal = (mannequinParams as any)[slider.key] * slider.base;
+                          return (
+                            <div key={slider.key} className="space-y-3">
+                              <div className="flex justify-between items-center group">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-black/30 group-hover:text-black transition-colors">{slider.label}</label>
+                                <span className="text-[10px] font-mono font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md">{currentVal.toFixed(0)}</span>
+                              </div>
+                              <input 
+                                type="range"
+                                min={slider.min}
+                                max={slider.max}
+                                step="1"
+                                value={currentVal}
+                                onChange={(e) => {
+                                  const val = parseFloat(e.target.value);
+                                  setMannequinParams((p: any) => ({ ...p, [slider.key]: val / slider.base }));
+                                }}
+                                className="w-full h-1.5 bg-stone-100 rounded-full appearance-none cursor-pointer accent-indigo-600 hover:accent-indigo-500 transition-all"
+                              />
+                            </div>
+                          );
+                        })}
+                        
+                        {/* Body Type Slider (Weight) */}
+                        <div className="space-y-3 col-span-2 pt-2">
+                          <div className="flex justify-between items-center group">
+                            <label className="text-[10px] font-black uppercase tracking-widest text-black/30 group-hover:text-black transition-colors">{t('workshop_weight_label')}</label>
+                            <span className="text-[10px] font-mono font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md">{(mannequinParams as any).weight.toFixed(2)}</span>
                           </div>
                           <input 
                             type="range"
-                            min={slider.min}
-                            max={slider.max}
-                            step="1"
-                            value={currentVal}
+                            min="0.6"
+                            max="1.7"
+                            step="0.01"
+                            value={(mannequinParams as any).weight}
                             onChange={(e) => {
                               const val = parseFloat(e.target.value);
-                              setMannequinParams((p: any) => ({ ...p, [slider.key]: val / slider.base }));
+                              setMannequinParams((p: any) => ({ ...p, weight: val }));
                             }}
-                            className="w-full h-1 bg-stone-100 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                            className="w-full h-1.5 bg-stone-100 rounded-full appearance-none cursor-pointer accent-indigo-600 hover:accent-indigo-500 transition-all"
                           />
                         </div>
-                      );
-                    })}
-                    {/* Body Type Slider */}
-                    <div className="space-y-1.5 col-span-2">
-                      <div className="flex justify-between items-center">
-                        <label className="text-[8px] font-black uppercase tracking-widest text-black/40">{t('workshop_weight_label')}</label>
-                        <span className="text-[8px] font-mono text-black/60">{(mannequinParams as any).weight || 1.0}</span>
                       </div>
-                      <input 
-                        type="range"
-                        min="0.7"
-                        max="1.5"
-                        step="0.01"
-                        value={(mannequinParams as any).weight || 1.0}
-                        onChange={(e) => {
-                          const val = parseFloat(e.target.value);
-                          setMannequinParams((p: any) => ({ ...p, weight: val }));
-                        }}
-                        className="w-full h-1 bg-stone-100 rounded-lg appearance-none cursor-pointer accent-indigo-600"
-                      />
                     </div>
                   </div>
                 </div>
-              </div>
-            </motion.div>
+              </motion.div>
+            </>
           )}
         </AnimatePresence>
 

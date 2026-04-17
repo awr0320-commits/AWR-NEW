@@ -26,6 +26,7 @@ const translations: Translations = {
   workshop_body_controls_title: { zh: '模特兒身材調整', en: 'Mannequin Body Adjustment' },
   workshop_mode_3d: { zh: '3D 模特兒', en: '3D Mannequin' },
   workshop_mode_2d: { zh: '2D 模特兒', en: '2D Mannequin' },
+  workshop_upload_btn: { zh: '發布設計', en: 'Post Design' },
   workshop_male: { zh: '男性', en: 'Male' },
   workshop_female: { zh: '女性', en: 'Female' },
   workshop_height: { zh: '身高', en: 'Height' },
