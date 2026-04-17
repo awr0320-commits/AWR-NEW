@@ -1921,12 +1921,6 @@ const WorkshopView = ({ items, onSaveCreation, onPublish, onRemoveItem, isRateLi
 
         <div className="absolute top-8 left-6 right-6 flex items-start justify-between z-50 pointer-events-none">
           <div className="flex flex-col gap-3 pointer-events-auto">
-            <button 
-              onClick={onClose}
-              className="p-3 bg-white/80 backdrop-blur-xl rounded-2xl shadow-sm border border-black/5 active:scale-90 transition-all"
-            >
-              <ChevronRight className="rotate-180" size={24} />
-            </button>
           </div>
 
           <div className="flex flex-col items-end gap-3 pointer-events-auto">
