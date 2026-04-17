@@ -6,6 +6,7 @@ import {
   Book,
   Bookmark,
   Bot,
+  Box,
   Calendar,
   Camera,
   Check,
